@@ -9,6 +9,7 @@ export default function Nav() {
           <li><Link href="/pricing" className="text-gray-300 hover:text-purple-400">Pricing</Link></li>
           <li><Link href="/about" className="text-gray-300 hover:text-purple-400">About</Link></li>
           <li><Link href="/contact" className="text-gray-300 hover:text-purple-400">Contact</Link></li>
+          <li><Link href="/generate-image" className="text-gray-300 hover:text-purple-400">Generate Image</Link></li>
         </ul>
       </div>
     </nav>
