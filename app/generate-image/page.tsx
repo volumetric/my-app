@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Nav from "../components/Nav";
 import Footer from "../components/Footer";
 
@@ -24,6 +25,9 @@ export default function GenerateImage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [resolutions, setResolutions] = useState(dalle3Resolutions);
+  const [imageId, setImageId] = useState('');
+  const [shareMessage, setShareMessage] = useState('');
+  const router = useRouter();
 
   useEffect(() => {
     setResolutions(model === 'dalle-3' ? dalle3Resolutions : dalle2Resolutions);
@@ -51,6 +55,7 @@ export default function GenerateImage() {
 
       const data = await response.json();
       setImageUrl(data.imageUrl);
+      setImageId(data.imageId);
     } catch (err) {
       setError('Failed to generate image. Please try again.');
     } finally {
@@ -85,6 +90,17 @@ export default function GenerateImage() {
       console.error('Error downloading image:', error);
       setError('Failed to download image. Please try again.');
     }
+  };
+
+  const handleShare = () => {
+    const shareUrl = `${window.location.origin}/generate-image/${imageId}`;
+    navigator.clipboard.writeText(shareUrl).then(() => {
+      setShareMessage('Link copied to clipboard!');
+      setTimeout(() => setShareMessage(''), 3000); // Clear message after 3 seconds
+    }).catch(err => {
+      console.error('Failed to copy: ', err);
+      setShareMessage('Failed to copy link. Please try again.');
+    });
   };
 
   return (
@@ -160,6 +176,15 @@ export default function GenerateImage() {
                 >
                   Download Image
                 </button>
+                <button
+                  onClick={handleShare}
+                  className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900"
+                >
+                  Share Image Link
+                </button>
+                {shareMessage && (
+                  <p className="text-center text-green-400 mt-2">{shareMessage}</p>
+                )}
               </div>
             ) : (
               <div className="w-full h-64 bg-gray-800 rounded-lg flex items-center justify-center">

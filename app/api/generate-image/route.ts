@@ -46,10 +46,11 @@ export async function POST(request: Request) {
       const command = new PutObjectCommand(uploadParams);
       await s3Client.send(command);
 
+      const imageId = fileName.replace('generated-image-', '').replace('.png', '');
       const s3Url = `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileName}`;
       console.log('Image uploaded to S3:', s3Url);
 
-      return NextResponse.json({ imageUrl: s3Url });
+      return NextResponse.json({ imageUrl: s3Url, imageId });
     } else {
       throw new Error('Image URL not found in the response');
     }
