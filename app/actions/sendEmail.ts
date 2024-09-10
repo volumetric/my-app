@@ -3,7 +3,7 @@
 import nodemailer from 'nodemailer';
 
 export async function sendEmail(formData: { name: string; email: string; message: string }) {
-  let transporter = nodemailer.createTransport({
+  const transporter = nodemailer.createTransport({
     host: "smtp.sendgrid.net",
     port: 587,
     secure: false, // Use TLS
@@ -15,7 +15,7 @@ export async function sendEmail(formData: { name: string; email: string; message
 
   try {
     // Send mail with defined transport object
-    let info = await transporter.sendMail({
+    const info = await transporter.sendMail({
       from: '"Asimov AI Contact Form" <vinit@hellotars.com>',
       to: "vinit@hellotars.com",
       subject: "New Contact Form Submission",

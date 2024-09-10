@@ -28,7 +28,7 @@ export default function Contact() {
   const [submitStatus, setSubmitStatus] = useState('');
 
   const validateForm = () => {
-    let errors: FormErrors = {};
+    const errors: FormErrors = {};
     if (!formData.name.trim()) errors.name = "Name is required";
     if (!formData.email.trim()) {
       errors.email = "Email is required";
@@ -70,8 +70,12 @@ export default function Contact() {
       } else {
         setSubmitStatus(`There was an error sending your message: ${result.error}`);
       }
-    } catch (error: any) {
-      setSubmitStatus(`There was an error sending your message: ${error.message}`);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setSubmitStatus(`There was an error sending your message: ${error.message}`);
+      } else {
+        setSubmitStatus('There was an unknown error sending your message.');
+      }
     }
     setIsSubmitting(false);
   };
