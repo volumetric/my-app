@@ -31,13 +31,19 @@ export async function POST(request: Request) {
 
 async function sendEmailInBackground(imageUrl: string, prompt: string, model: string) {
   try {
+    console.log('Fetching image from URL:', imageUrl);
     // Fetch the image data
     const imageResponse = await fetch(imageUrl);
+    if (!imageResponse.ok) {
+      throw new Error(`Failed to fetch image: ${imageResponse.statusText}`);
+    }
     const imageArrayBuffer = await imageResponse.arrayBuffer();
     const base64Image = Buffer.from(imageArrayBuffer).toString('base64');
+    console.log('Image fetched and converted to base64');
 
+    console.log('Sending email...');
     // Send email with the generated image
-    await sendEmail(
+    const emailResult = await sendEmail(
       { name: model, email: '', message: prompt },
       {
         filename: 'generated-image.png',
@@ -46,8 +52,8 @@ async function sendEmailInBackground(imageUrl: string, prompt: string, model: st
         contentType: 'image/png',
       }
     );
-    console.log('Email sent successfully');
+    console.log('Email sent result:', emailResult);
   } catch (error) {
-    console.error('Error sending email:', error);
+    console.error('Error in sendEmailInBackground:', error);
   }
 }

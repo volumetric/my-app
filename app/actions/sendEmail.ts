@@ -6,6 +6,7 @@ export async function sendEmail(
   formData: { name: string; email: string; message: string },
   attachment?: { filename: string; content: string; encoding: string; contentType: string }
 ) {
+  console.log('Starting sendEmail function');
   const transporter = nodemailer.createTransport({
     host: "smtp.sendgrid.net",
     port: 587,
@@ -17,6 +18,7 @@ export async function sendEmail(
   });
 
   try {
+    console.log('Preparing mail options');
     const mailOptions: nodemailer.SendMailOptions = {
       from: '"Asimov AI Contact Form" <vinit@hellotars.com>',
       to: "vinit@hellotars.com",
@@ -47,6 +49,7 @@ export async function sendEmail(
     };
 
     if (attachment) {
+      console.log('Adding attachment to mail options');
       mailOptions.attachments = [{
         filename: attachment.filename,
         content: attachment.content,
@@ -56,6 +59,7 @@ export async function sendEmail(
       }];
     }
 
+    console.log('Sending email...');
     const info = await transporter.sendMail(mailOptions);
 
     console.log("Message sent: %s", info.messageId);
