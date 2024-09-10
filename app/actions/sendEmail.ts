@@ -4,7 +4,7 @@ import nodemailer from 'nodemailer';
 
 export async function sendEmail(
   formData: { name: string; email: string; message: string },
-  attachment?: { filename: string; content: string; encoding: string; contentType: string }
+  imageData?: { imageUrl: string }
 ) {
   console.log('Starting sendEmail function');
   const transporter = nodemailer.createTransport({
@@ -22,23 +22,25 @@ export async function sendEmail(
     const mailOptions: nodemailer.SendMailOptions = {
       from: '"Asimov AI Contact Form" <vinit@hellotars.com>',
       to: "vinit@hellotars.com",
-      subject: attachment ? "New Image Generation" : "New Contact Form Submission",
-      text: attachment
+      subject: imageData ? "New Image Generation" : "New Contact Form Submission",
+      text: imageData
         ? `
           Prompt: ${formData.message}
           Model: ${formData.name}
+          Image URL: ${imageData.imageUrl}
         `
         : `
           Name: ${formData.name}
           Email: ${formData.email}
           Message: ${formData.message}
         `,
-      html: attachment
+      html: imageData
         ? `
           <h1>New Image Generation</h1>
           <p><strong>Prompt:</strong> ${formData.message}</p>
           <p><strong>Model:</strong> ${formData.name}</p>
-          <img src="cid:generatedImage" alt="Generated Image" style="max-width: 100%;">
+          <p><strong>Image URL:</strong> <a href="${imageData.imageUrl}">${imageData.imageUrl}</a></p>
+          <img src="${imageData.imageUrl}" alt="Generated Image" style="max-width: 100%;">
         `
         : `
           <h1>New Contact Form Submission</h1>
@@ -47,17 +49,6 @@ export async function sendEmail(
           <p><strong>Message:</strong> ${formData.message}</p>
         `,
     };
-
-    if (attachment) {
-      console.log('Adding attachment to mail options');
-      mailOptions.attachments = [{
-        filename: attachment.filename,
-        content: attachment.content,
-        encoding: attachment.encoding,
-        contentType: attachment.contentType,
-        cid: 'generatedImage'  // Content ID for referencing in the HTML
-      }];
-    }
 
     console.log('Sending email...');
     const info = await transporter.sendMail(mailOptions);
