@@ -4,6 +4,7 @@ Asimov AI is a socially intelligent team assistant and coach designed for high-p
 
 ## Features
 
+
 - Responsive landing page with information about Asimov AI
 - Pricing page with toggle between monthly and annual plans
 - About page detailing the company's mission and values
