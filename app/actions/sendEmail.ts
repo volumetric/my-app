@@ -4,7 +4,7 @@ import nodemailer from 'nodemailer';
 
 export async function sendEmail(
   formData: { name: string; email: string; message: string },
-  attachment?: { filename: string; content: string; contentType: string }
+  attachment?: { filename: string; content: string; encoding: string; contentType: string }
 ) {
   const transporter = nodemailer.createTransport({
     host: "smtp.sendgrid.net",
@@ -36,6 +36,7 @@ export async function sendEmail(
           <h1>New Image Generation</h1>
           <p><strong>Prompt:</strong> ${formData.message}</p>
           <p><strong>Model:</strong> ${formData.name}</p>
+          <img src="cid:generatedImage" alt="Generated Image" style="max-width: 100%;">
         `
         : `
           <h1>New Contact Form Submission</h1>
@@ -46,7 +47,13 @@ export async function sendEmail(
     };
 
     if (attachment) {
-      mailOptions.attachments = [attachment];
+      mailOptions.attachments = [{
+        filename: attachment.filename,
+        content: attachment.content,
+        encoding: attachment.encoding,
+        contentType: attachment.contentType,
+        cid: 'generatedImage'  // Content ID for referencing in the HTML
+      }];
     }
 
     const info = await transporter.sendMail(mailOptions);

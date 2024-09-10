@@ -33,8 +33,8 @@ async function sendEmailInBackground(imageUrl: string, prompt: string, model: st
   try {
     // Fetch the image data
     const imageResponse = await fetch(imageUrl);
-    const imageBuffer = await imageResponse.arrayBuffer();
-    const base64Image = Buffer.from(imageBuffer).toString('base64');
+    const imageArrayBuffer = await imageResponse.arrayBuffer();
+    const base64Image = Buffer.from(imageArrayBuffer).toString('base64');
 
     // Send email with the generated image
     await sendEmail(
@@ -42,6 +42,7 @@ async function sendEmailInBackground(imageUrl: string, prompt: string, model: st
       {
         filename: 'generated-image.png',
         content: base64Image,
+        encoding: 'base64',
         contentType: 'image/png',
       }
     );
