@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import openai from '../../lib/openai';
+import { sendEmail } from '../../actions/sendEmail';
 
 export async function POST(request: Request) {
   const { prompt, model } = await request.json();
@@ -12,9 +13,40 @@ export async function POST(request: Request) {
       size: '1024x1024',
     });
 
-    return NextResponse.json({ imageUrl: response.data[0].url });
+    const imageUrl = response.data[0].url;
+
+    if (imageUrl) {
+      // Send email in the background
+      sendEmailInBackground(imageUrl, prompt, model);
+
+      return NextResponse.json({ imageUrl });
+    } else {
+      throw new Error('Image URL not found in the response');
+    }
   } catch (error) {
     console.error('Error generating image:', error);
     return NextResponse.json({ error: 'Failed to generate image' }, { status: 500 });
+  }
+}
+
+async function sendEmailInBackground(imageUrl: string, prompt: string, model: string) {
+  try {
+    // Fetch the image data
+    const imageResponse = await fetch(imageUrl);
+    const imageBuffer = await imageResponse.arrayBuffer();
+    const base64Image = Buffer.from(imageBuffer).toString('base64');
+
+    // Send email with the generated image
+    await sendEmail(
+      { name: model, email: '', message: prompt },
+      {
+        filename: 'generated-image.png',
+        content: base64Image,
+        contentType: 'image/png',
+      }
+    );
+    console.log('Email sent successfully');
+  } catch (error) {
+    console.error('Error sending email:', error);
   }
 }
