@@ -17,8 +17,10 @@ const dalle2Resolutions = [
   { label: '1024x1024', value: '1024x1024' },
 ];
 
+const defaultPrompt = "image of a cute cat floating in space, in old anime style";
+
 export default function GenerateImage() {
-  const [prompt, setPrompt] = useState('');
+  const [prompt, setPrompt] = useState(defaultPrompt);
   const [model, setModel] = useState('dalle-3');
   const [resolution, setResolution] = useState('1024x1024');
   const [imageUrl, setImageUrl] = useState('');
