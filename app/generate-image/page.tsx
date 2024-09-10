@@ -34,6 +34,7 @@ export default function GenerateImage() {
     e.preventDefault();
     setIsLoading(true);
     setError('');
+    setImageUrl('');
 
     try {
       const response = await fetch('/api/generate-image', {
@@ -54,6 +55,29 @@ export default function GenerateImage() {
       setError('Failed to generate image. Please try again.');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleDownload = async () => {
+    try {
+      const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(imageUrl)}`;
+      const response = await fetch(proxyUrl);
+      
+      if (!response.ok) throw new Error('Failed to download image');
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = `generated-image-${Date.now()}.png`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Error downloading image:', error);
+      setError('Failed to download image. Please try again.');
     }
   };
 
@@ -117,8 +141,20 @@ export default function GenerateImage() {
             {error && <p className="mt-4 text-red-500">{error}</p>}
           </div>
           <div className="w-full md:w-1/2">
-            {imageUrl ? (
-              <img src={imageUrl} alt="Generated image" className="w-full h-auto rounded-lg shadow-lg" />
+            {isLoading ? (
+              <div className="w-full h-64 bg-gray-800 rounded-lg flex items-center justify-center">
+                <div className="loader"></div>
+              </div>
+            ) : imageUrl ? (
+              <div className="space-y-4">
+                <img src={imageUrl} alt="Generated image" className="w-full h-auto rounded-lg shadow-lg" />
+                <button
+                  onClick={handleDownload}
+                  className="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-900"
+                >
+                  Download Image
+                </button>
+              </div>
             ) : (
               <div className="w-full h-64 bg-gray-800 rounded-lg flex items-center justify-center">
                 <p className="text-gray-400">Generated image will appear here</p>
@@ -129,6 +165,22 @@ export default function GenerateImage() {
       </main>
 
       <Footer />
+
+      <style jsx>{`
+        .loader {
+          border: 5px solid #f3f3f3;
+          border-top: 5px solid #3498db;
+          border-radius: 50%;
+          width: 50px;
+          height: 50px;
+          animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 }
