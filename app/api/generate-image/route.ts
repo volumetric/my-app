@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import openai from '../../lib/openai';
-import { sendEmail } from '../../actions/sendEmail';
+// import { sendEmail } from '../../actions/sendEmail';
 
 type SupportedSize = "256x256" | "512x512" | "1024x1024" | "1792x1024" | "1024x1792";
 
@@ -20,8 +20,8 @@ export async function POST(request: Request) {
 
     if (imageUrl) {
       console.log('Image generated successfully. URL:', imageUrl);
-      // Send email in the background
-      sendEmailInBackground(imageUrl, prompt, model, resolution);
+      // Commenting out email sending
+      // sendEmailInBackground(imageUrl, prompt, model, resolution);
 
       return NextResponse.json({ imageUrl });
     } else {
@@ -33,6 +33,8 @@ export async function POST(request: Request) {
   }
 }
 
+// Commenting out email sending function
+/*
 async function sendEmailInBackground(imageUrl: string, prompt: string, model: string, resolution: string) {
   try {
     console.log('Sending email with image URL...');
@@ -46,3 +48,4 @@ async function sendEmailInBackground(imageUrl: string, prompt: string, model: st
     console.error('Error in sendEmailInBackground:', error);
   }
 }
+*/
