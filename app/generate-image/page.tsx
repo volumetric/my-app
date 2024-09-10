@@ -59,9 +59,13 @@ export default function GenerateImage() {
   };
 
   const handleDownload = async () => {
+    if (!imageUrl) {
+      setError('No image to download.');
+      return;
+    }
+
     try {
-      const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(imageUrl)}`;
-      const response = await fetch(proxyUrl);
+      const response = await fetch(imageUrl);
       
       if (!response.ok) throw new Error('Failed to download image');
 
@@ -70,7 +74,9 @@ export default function GenerateImage() {
       const a = document.createElement('a');
       a.style.display = 'none';
       a.href = url;
-      a.download = `generated-image-${Date.now()}.png`;
+      // Extract the filename from the S3 URL
+      const fileName = imageUrl.split('/').pop() || `generated-image-${Date.now()}.png`;
+      a.download = fileName;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);

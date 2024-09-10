@@ -1,8 +1,17 @@
 import { NextResponse } from 'next/server';
 import openai from '../../lib/openai';
-// import { sendEmail } from '../../actions/sendEmail';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import fetch from 'node-fetch';
 
 type SupportedSize = "256x256" | "512x512" | "1024x1024" | "1792x1024" | "1024x1792";
+
+const s3Client = new S3Client({
+  region: process.env.AWS_REGION || 'us-east-1',
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+  },
+});
 
 export async function POST(request: Request) {
   const { prompt, model, resolution } = await request.json();
@@ -20,16 +29,33 @@ export async function POST(request: Request) {
 
     if (imageUrl) {
       console.log('Image generated successfully. URL:', imageUrl);
-      // Commenting out email sending
-      // sendEmailInBackground(imageUrl, prompt, model, resolution);
+      
+      // Download the image
+      const imageResponse = await fetch(imageUrl);
+      const imageBuffer = await imageResponse.arrayBuffer();
 
-      return NextResponse.json({ imageUrl });
+      // Upload to S3
+      const fileName = `generated-image-${Date.now()}.png`;
+      const uploadParams = {
+        Bucket: process.env.S3_BUCKET_NAME!,
+        Key: fileName,
+        Body: Buffer.from(imageBuffer),
+        ContentType: 'image/png',
+      };
+
+      const command = new PutObjectCommand(uploadParams);
+      await s3Client.send(command);
+
+      const s3Url = `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileName}`;
+      console.log('Image uploaded to S3:', s3Url);
+
+      return NextResponse.json({ imageUrl: s3Url });
     } else {
       throw new Error('Image URL not found in the response');
     }
   } catch (error) {
-    console.error('Error generating image:', error);
-    return NextResponse.json({ error: 'Failed to generate image' }, { status: 500 });
+    console.error('Error generating or uploading image:', error);
+    return NextResponse.json({ error: 'Failed to generate or upload image' }, { status: 500 });
   }
 }
 
