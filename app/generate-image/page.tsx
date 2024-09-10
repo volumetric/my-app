@@ -1,15 +1,34 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Nav from "../components/Nav";
 import Footer from "../components/Footer";
+
+const dalle3Resolutions = [
+  { label: '1024x1024', value: '1024x1024' },
+  { label: '1792x1024', value: '1792x1024' },
+  { label: '1024x1792', value: '1024x1792' },
+];
+
+const dalle2Resolutions = [
+  { label: '256x256', value: '256x256' },
+  { label: '512x512', value: '512x512' },
+  { label: '1024x1024', value: '1024x1024' },
+];
 
 export default function GenerateImage() {
   const [prompt, setPrompt] = useState('');
   const [model, setModel] = useState('dalle-3');
+  const [resolution, setResolution] = useState('1024x1024');
   const [imageUrl, setImageUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [resolutions, setResolutions] = useState(dalle3Resolutions);
+
+  useEffect(() => {
+    setResolutions(model === 'dalle-3' ? dalle3Resolutions : dalle2Resolutions);
+    setResolution('1024x1024'); // Reset to a common resolution when changing models
+  }, [model]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,7 +41,7 @@ export default function GenerateImage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ prompt, model }),
+        body: JSON.stringify({ prompt, model, resolution }),
       });
 
       if (!response.ok) {
@@ -70,6 +89,21 @@ export default function GenerateImage() {
                 >
                   <option value="dalle-3">DALL-E 3</option>
                   <option value="dalle-2">DALL-E 2</option>
+                </select>
+              </div>
+              <div>
+                <label htmlFor="resolution" className="block text-sm font-medium text-gray-300 mb-1">Resolution</label>
+                <select
+                  id="resolution"
+                  value={resolution}
+                  onChange={(e) => setResolution(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                >
+                  {resolutions.map((res) => (
+                    <option key={res.value} value={res.value}>
+                      {res.label}
+                    </option>
+                  ))}
                 </select>
               </div>
               <button

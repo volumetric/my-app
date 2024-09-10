@@ -4,7 +4,7 @@ import nodemailer from 'nodemailer';
 
 export async function sendEmail(
   formData: { name: string; email: string; message: string },
-  imageData?: { imageUrl: string }
+  imageData?: { imageUrl: string; resolution?: string }
 ) {
   console.log('Starting sendEmail function');
   const transporter = nodemailer.createTransport({
@@ -27,6 +27,7 @@ export async function sendEmail(
         ? `
           Prompt: ${formData.message}
           Model: ${formData.name}
+          Resolution: ${imageData.resolution}
           Image URL: ${imageData.imageUrl}
         `
         : `
@@ -39,6 +40,7 @@ export async function sendEmail(
           <h1>New Image Generation</h1>
           <p><strong>Prompt:</strong> ${formData.message}</p>
           <p><strong>Model:</strong> ${formData.name}</p>
+          <p><strong>Resolution:</strong> ${imageData.resolution}</p>
           <p><strong>Image URL:</strong> <a href="${imageData.imageUrl}">${imageData.imageUrl}</a></p>
           <img src="${imageData.imageUrl}" alt="Generated Image" style="max-width: 100%;">
         `
